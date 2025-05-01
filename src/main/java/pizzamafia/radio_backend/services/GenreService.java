@@ -21,8 +21,8 @@ public class GenreService {
 
     // 1️⃣ CREATE GENRE
     public Genre createGenre(Genre genre) {
-        if (genre.getName() == null || genre.getName().toString().isBlank()) {
-            throw new BadRequestException("Il nome del genere è obbligatorio.");
+        if (genre.getName() == null) {
+            throw new BadRequestException("Il nome del genere (enum) è obbligatorio.");
         }
         Genre savedGenre = genreRepository.save(genre);
         LOGGER.info("✅ Genere creato: " + savedGenre.getName());

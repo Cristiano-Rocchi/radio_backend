@@ -92,7 +92,8 @@ public class AlbumService {
     }
 
     private File saveFileLocally(MultipartFile file) throws IOException {
-        String uploadDir = "uploads";
+        String uploadDir = System.getProperty("user.dir") + "/uploads";
+
         File uploadPath = new File(uploadDir);
         if (!uploadPath.exists()) {
             boolean created = uploadPath.mkdirs();
