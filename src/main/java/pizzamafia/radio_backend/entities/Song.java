@@ -1,6 +1,5 @@
 package pizzamafia.radio_backend.entities;
 
-
 import jakarta.persistence.*;
 import lombok.*;
 import pizzamafia.radio_backend.enums.Subgenre;
@@ -37,5 +36,11 @@ public class Song {
     @JoinColumn(name = "album_id", nullable = false)
     private Album album;
 
+
+    @Column
+    private String bucketName;
+
+    @Column
+    private String fileName;
 
 }

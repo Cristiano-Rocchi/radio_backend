@@ -7,11 +7,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import pizzamafia.radio_backend.entities.Album;
+import pizzamafia.radio_backend.payloads.AlbumRespDTO;
 import pizzamafia.radio_backend.services.AlbumService;
 
 import java.util.List;
 import java.util.UUID;
-
 @RestController
 @RequestMapping("/album")
 public class AlbumController {
@@ -31,17 +31,17 @@ public class AlbumController {
         return new ResponseEntity<>(createdAlbum, HttpStatus.CREATED);
     }
 
-    // 2️⃣ GET ALL ALBUMS
+    // 2️⃣ GET ALL ALBUMS (con URL presigned)
     @GetMapping
-    public ResponseEntity<List<Album>> getAllAlbums() {
-        List<Album> albums = albumService.getAllAlbums();
+    public ResponseEntity<List<AlbumRespDTO>> getAllAlbums() {
+        List<AlbumRespDTO> albums = albumService.getAllAlbumsWithPresignedUrls();
         return ResponseEntity.ok(albums);
     }
 
-    // 3️⃣ GET ALBUM BY ID
+    // 3️⃣ GET ALBUM BY ID (con URL presigned)
     @GetMapping("/{id}")
-    public ResponseEntity<Album> getAlbumById(@PathVariable UUID id) {
-        Album album = albumService.getAlbumById(id);
+    public ResponseEntity<AlbumRespDTO> getAlbumById(@PathVariable UUID id) {
+        AlbumRespDTO album = albumService.getAlbumByIdWithPresignedUrls(id);
         return ResponseEntity.ok(album);
     }
 
@@ -64,4 +64,3 @@ public class AlbumController {
         return ResponseEntity.ok(updatedAlbum);
     }
 }
-

@@ -1,13 +1,12 @@
 package pizzamafia.radio_backend.controller;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import pizzamafia.radio_backend.entities.Song;
 import pizzamafia.radio_backend.enums.Subgenre;
+import pizzamafia.radio_backend.payloads.SongRespDTO;
 import pizzamafia.radio_backend.services.SongService;
 
 import java.util.List;
@@ -20,27 +19,27 @@ public class SongController {
     @Autowired
     private SongService songService;
 
-    // 1️⃣ ADD SONGS to an album
+    // 1️⃣ ADD SONGS (ritorna SongRespDTO)
     @PostMapping("/add/{albumId}")
-    public ResponseEntity<List<Song>> addSongs(
+    public ResponseEntity<List<SongRespDTO>> addSongs(
             @PathVariable UUID albumId,
             @RequestParam("songs") List<MultipartFile> songs) {
 
-        List<Song> addedSongs = songService.addSongs(albumId, songs);
+        List<SongRespDTO> addedSongs = songService.addSongs(albumId, songs);
         return new ResponseEntity<>(addedSongs, HttpStatus.CREATED);
     }
 
-    // 2️⃣ GET ALL SONGS
+    // 2️⃣ GET ALL SONGS (ritorna SongRespDTO)
     @GetMapping
-    public ResponseEntity<List<Song>> getAllSongs() {
-        List<Song> songs = songService.getAllSongs();
+    public ResponseEntity<List<SongRespDTO>> getAllSongs() {
+        List<SongRespDTO> songs = songService.getAllSongs();
         return ResponseEntity.ok(songs);
     }
 
-    // 3️⃣ GET SONG BY ID
+    // 3️⃣ GET SONG BY ID (ritorna SongRespDTO)
     @GetMapping("/{id}")
-    public ResponseEntity<Song> getSongById(@PathVariable UUID id) {
-        Song song = songService.getSongById(id);
+    public ResponseEntity<SongRespDTO> getSongById(@PathVariable UUID id) {
+        SongRespDTO song = songService.getSongById(id);
         return ResponseEntity.ok(song);
     }
 
@@ -53,15 +52,14 @@ public class SongController {
 
     // 5️⃣ UPDATE SONG
     @PutMapping("/{id}")
-    public ResponseEntity<Song> updateSong(
+    public ResponseEntity<String> updateSong(
             @PathVariable UUID id,
             @RequestParam(required = false) String title,
             @RequestParam(required = false) Integer rating,
             @RequestParam(required = false) Integer level,
             @RequestParam(required = false) Subgenre subgenre) {
 
-        Song updatedSong = songService.updateSong(id, title, rating, level, subgenre);
-        return ResponseEntity.ok(updatedSong);
+        songService.updateSong(id, title, rating, level, subgenre);
+        return ResponseEntity.ok("✅ Canzone aggiornata");
     }
 }
-

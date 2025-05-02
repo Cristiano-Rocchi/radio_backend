@@ -64,6 +64,13 @@
 			<artifactId>spring-boot-starter-validation</artifactId>
 			<version>3.3.3</version>
 		</dependency>
+
+		<!-- dipendenze backblaze -->
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>s3</artifactId>
+			<version>2.20.20</version> <!-- Assicurati di usare l'ultima versione -->
+		</dependency>
 	</dependencies>
 
 
