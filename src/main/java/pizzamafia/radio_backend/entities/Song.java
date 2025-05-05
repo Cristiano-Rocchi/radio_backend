@@ -1,5 +1,6 @@
 package pizzamafia.radio_backend.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import pizzamafia.radio_backend.enums.Subgenre;

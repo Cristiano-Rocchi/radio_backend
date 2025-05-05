@@ -63,6 +63,7 @@ public class AlbumService {
         String albumName = newAlbumDTO.getTitle();
         String artist = newAlbumDTO.getArtist();
         Long genreId = newAlbumDTO.getGenreId();
+        Integer albumDate = newAlbumDTO.getDate();
         List<MultipartFile> songs = newAlbumDTO.getSongs();
 
         if (albumName == null || albumName.isBlank()) {
@@ -79,7 +80,7 @@ public class AlbumService {
         album.setTitle(albumName);
         album.setArtist(artist != null ? artist : "Unknown Artist");
         album.setGenre(genre);
-        album.setDate(LocalDate.now().getYear());
+        album.setDate(albumDate);
         album.setRating(0);
 
         albumRepository.save(album);

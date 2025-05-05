@@ -11,5 +11,7 @@ public class NewAlbumDTO {
     private String title;
     private String artist;
     private Long genreId;
+    private Integer date;
     private List<MultipartFile> songs;
 }
+
