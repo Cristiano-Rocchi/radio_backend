@@ -44,4 +44,8 @@ public class Song {
     @Column
     private String fileName;
 
+    @Column
+    private Integer duration;
+
+
 }

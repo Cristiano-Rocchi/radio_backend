@@ -1,5 +1,6 @@
 package pizzamafia.radio_backend.services;
 
+import com.mpatric.mp3agic.Mp3File;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -141,6 +142,9 @@ public class SongService {
                     throw new InternalServerErrorException("❌ Nessun bucket ha spazio sufficiente per: " + normalizedFilename);
                 }
 
+                Integer duration = getAudioDurationInSeconds(fileToUpload);
+                LOGGER.info("⏱️ Durata estratta: " + duration + " secondi");
+
                 // Salva la canzone nel DB
                 Song song = new Song();
                 song.setTitolo(titolo);
@@ -150,16 +154,20 @@ public class SongService {
                 song.setAlbum(album);
                 song.setBucketName(bucketUsed);
                 song.setFileName(normalizedFilename);
+                song.setDuration(duration);
 
                 Song saved = songRepository.save(song);
                 String presignedUrl = generatePresignedUrl(bucketUsed, normalizedFilename);
+
 
                 savedSongs.add(new SongRespDTO(
                         saved.getId(),
                         saved.getTitolo(),
                         presignedUrl,
-                        saved.getBucketName()
+                        saved.getBucketName(),
+                        saved.getDuration()
                 ));
+
 
 
 
@@ -215,6 +223,19 @@ public class SongService {
     }
 
 
+    // estrapola durata song
+    private Integer getAudioDurationInSeconds(File audioFile) {
+        try {
+            Mp3File mp3file = new Mp3File(audioFile);
+            return (int) mp3file.getLengthInSeconds();
+        } catch (Exception e) {
+            LOGGER.warning("⚠️ Impossibile leggere la durata del file audio: " + audioFile.getName());
+            return null;
+        }
+    }
+
+
+
 
     private long getUsedStorage(String bucketName) {
         S3Client s3Client = backblazeAccounts.get(bucketName);
@@ -241,10 +262,12 @@ public class SongService {
                         song.getId(),
                         song.getTitolo(),
                         generatePresignedUrl(song.getBucketName(), song.getFileName()),
-                        song.getBucketName()
+                        song.getBucketName(),
+                        song.getDuration()   // 👈 aggiunto qui
                 ))
                 .collect(Collectors.toList());
     }
+
 
 
     // 3️⃣ GET SONG BY ID (con presigned URL)
@@ -256,9 +279,11 @@ public class SongService {
                 song.getId(),
                 song.getTitolo(),
                 generatePresignedUrl(song.getBucketName(), song.getFileName()),
-                song.getBucketName()
+                song.getBucketName(),
+                song.getDuration()   // 👈 aggiunto qui
         );
     }
+
 
 
     // 4️⃣ DELETE SONG

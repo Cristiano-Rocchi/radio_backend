@@ -1,5 +1,6 @@
 package pizzamafia.radio_backend.services;
 
+import com.mpatric.mp3agic.Mp3File;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -139,7 +140,11 @@ public class AlbumService {
 
                 s3Client.putObject(uploadRequest, RequestBody.fromFile(fileToUpload));
 
-                // Crea Song nel DB
+                // 👇 Calcola durata dopo la conversione (fileToUpload è sempre mp3)
+                Integer duration = getAudioDurationInSeconds(fileToUpload);
+                LOGGER.info("⏱️ Durata estratta: " + duration + " secondi");
+
+// Crea Song nel DB
                 Song song = new Song();
                 song.setTitolo(titolo);
                 song.setBucketName(bucketName);
@@ -148,8 +153,10 @@ public class AlbumService {
                 song.setLevel(0);
                 song.setSubgenre(null);
                 song.setAlbum(album);
+                song.setDuration(duration);
 
                 songRepository.save(song);
+
 
                 // Pulizia file temporanei
                 tempFile.delete();
@@ -203,6 +210,18 @@ public class AlbumService {
         LOGGER.info("✅ Conversione completata: " + outputFile.getAbsolutePath());
         return outputFile;
     }
+
+    // estrapola durata song
+    private Integer getAudioDurationInSeconds(File audioFile) {
+        try {
+            Mp3File mp3file = new Mp3File(audioFile);
+            return (int) mp3file.getLengthInSeconds();
+        } catch (Exception e) {
+            LOGGER.warning("⚠️ Impossibile leggere la durata del file audio: " + audioFile.getName());
+            return null;
+        }
+    }
+
 
     // 🔍 Determina il bucket corretto
     private String determineBucket(long fileSize) {
@@ -280,7 +299,8 @@ public class AlbumService {
                         song.getId(),
                         song.getTitolo(),
                         presignedUrl,
-                        song.getBucketName()  // 👈 aggiunto qui
+                        song.getBucketName(),
+                        song.getDuration()   // 👈 aggiunto qui
                 );
             }).collect(Collectors.toList());
 
@@ -296,6 +316,7 @@ public class AlbumService {
     }
 
 
+
     // ✅ GET ONE con presigned URL
     public AlbumRespDTO getAlbumByIdWithPresignedUrls(UUID id) {
         Album album = albumRepository.findById(id)
@@ -307,7 +328,8 @@ public class AlbumService {
                     song.getId(),
                     song.getTitolo(),
                     presignedUrl,
-                    song.getBucketName()  // 👈 aggiunto qui
+                    song.getBucketName(),
+                    song.getDuration()   // 👈 aggiunto qui
             );
         }).collect(Collectors.toList());
 
@@ -320,6 +342,7 @@ public class AlbumService {
                 songDtos
         );
     }
+
 
 
     // 🔑 Genera URL firmato

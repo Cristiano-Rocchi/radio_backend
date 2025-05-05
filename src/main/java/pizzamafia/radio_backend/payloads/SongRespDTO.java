@@ -13,5 +13,7 @@ public class SongRespDTO {
     private UUID id;
     private String titolo;
     private String presignedUrl;
-    private String bucketName;  // 👈 aggiunto
+    private String bucketName;
+    private Integer duration;
+
 }
