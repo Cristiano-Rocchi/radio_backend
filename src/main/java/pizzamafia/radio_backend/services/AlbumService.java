@@ -11,6 +11,7 @@ import pizzamafia.radio_backend.exceptions.BadRequestException;
 import pizzamafia.radio_backend.exceptions.InternalServerErrorException;
 import pizzamafia.radio_backend.exceptions.NotFoundException;
 import pizzamafia.radio_backend.payloads.AlbumRespDTO;
+import pizzamafia.radio_backend.payloads.NewAlbumDTO;
 import pizzamafia.radio_backend.payloads.SongRespDTO;
 import pizzamafia.radio_backend.repositories.AlbumRepository;
 import pizzamafia.radio_backend.repositories.GenreRepository;
@@ -25,9 +26,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.URI;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -59,10 +58,12 @@ public class AlbumService {
     private BackblazeB2Config backblazeB2Config;
 
     // 1️⃣ CREATE: crea album + carica canzoni su Backblaze
-    public Album createAlbumFromUpload(String albumName,
-                                       String artist,
-                                       UUID genreId,
-                                       List<MultipartFile> songs) {
+    public Album createAlbumFromUpload(NewAlbumDTO newAlbumDTO) {
+
+        String albumName = newAlbumDTO.getTitle();
+        String artist = newAlbumDTO.getArtist();
+        UUID genreId = newAlbumDTO.getGenreId();
+        List<MultipartFile> songs = newAlbumDTO.getSongs();
 
         if (albumName == null || albumName.isBlank()) {
             throw new BadRequestException("Il titolo dell'album è obbligatorio.");
@@ -96,15 +97,30 @@ public class AlbumService {
                         .replaceAll("[^a-zA-Z0-9\\-]", "")
                         + "-" + UUID.randomUUID() + estensione;
 
-                // Salva temporaneamente il file
-                File tempFile = File.createTempFile("upload_", null);
+                // Salva temporaneamente il file originale
+                File tempFile = File.createTempFile("upload_", estensione);
                 try (FileOutputStream fos = new FileOutputStream(tempFile)) {
                     fos.write(file.getBytes());
                 }
 
-                long fileSize = tempFile.length();
+                // 👇 Convertiamo se NON è già mp3
+                File fileToUpload;
+                if (!estensione.equalsIgnoreCase(".mp3")) {
+                    LOGGER.info("🔄 Converto " + originalFilename + " in mp3...");
+                    fileToUpload = convertToMp3(tempFile);
+                    // Aggiorniamo il nome del file (ora è mp3)
+                    normalizedFilename = titolo
+                            .trim()
+                            .replaceAll("\\s+", "-")
+                            .replaceAll("[^a-zA-Z0-9\\-]", "")
+                            + "-" + UUID.randomUUID() + ".mp3";
+                } else {
+                    fileToUpload = tempFile;
+                }
 
-                // Determina il bucket giusto
+                long fileSize = fileToUpload.length();
+
+                // Trova il bucket giusto
                 String bucketName = determineBucket(fileSize);
                 LOGGER.info("📦 Bucket selezionato: " + bucketName);
 
@@ -113,13 +129,20 @@ public class AlbumService {
                     throw new InternalServerErrorException("❌ Nessun client S3 trovato per il bucket: " + bucketName);
                 }
 
-                uploadToBackblazeB2(s3Client, bucketName, tempFile, normalizedFilename);
+                // Upload su Backblaze
+                PutObjectRequest uploadRequest = PutObjectRequest.builder()
+                        .bucket(bucketName)
+                        .key(normalizedFilename)
+                        .contentType("audio/mpeg")  // mp3 MIME type
+                        .build();
+
+                s3Client.putObject(uploadRequest, RequestBody.fromFile(fileToUpload));
 
                 // Crea Song nel DB
                 Song song = new Song();
                 song.setTitolo(titolo);
-                song.setBucketName(bucketName);  // 👈 IMPORTANTE: salva bucket
-                song.setFileName(normalizedFilename);  // 👈 IMPORTANTE: salva filename
+                song.setBucketName(bucketName);
+                song.setFileName(normalizedFilename);
                 song.setRating(0);
                 song.setLevel(0);
                 song.setSubgenre(null);
@@ -127,7 +150,11 @@ public class AlbumService {
 
                 songRepository.save(song);
 
-                tempFile.delete(); // cleanup file temp
+                // Pulizia file temporanei
+                tempFile.delete();
+                if (fileToUpload != tempFile) {
+                    fileToUpload.delete();
+                }
 
             } catch (Exception e) {
                 throw new InternalServerErrorException("Errore durante l'upload della traccia: " + e.getMessage());
@@ -136,6 +163,44 @@ public class AlbumService {
 
         LOGGER.info("✅ Album creato con successo: " + albumName + " con " + songs.size() + " tracce.");
         return album;
+    }
+
+
+    // Converte in mp3
+    private File convertToMp3(File inputFile) throws IOException, InterruptedException {
+        String inputFileName = inputFile.getName();
+        String outputFileName = inputFileName.substring(0, inputFileName.lastIndexOf('.')) + ".mp3";
+        File outputFile = new File(inputFile.getParent(), outputFileName);
+
+        ProcessBuilder pb = new ProcessBuilder(
+                "ffmpeg",
+                "-y", // overwrite output file if exists
+                "-i", inputFile.getAbsolutePath(),
+                "-vn", // no video
+                "-ar", "44100", // set audio rate
+                "-ac", "2", // set number of audio channels
+                "-b:a", "192k", // set audio bitrate
+                outputFile.getAbsolutePath()
+        );
+
+        pb.redirectErrorStream(true); // merge error and output streams
+        Process process = pb.start();
+
+        // Log output di FFmpeg (opzionale)
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                LOGGER.info(line);
+            }
+        }
+
+        int exitCode = process.waitFor();
+        if (exitCode != 0) {
+            throw new IOException("Errore durante la conversione audio. Exit code: " + exitCode);
+        }
+
+        LOGGER.info("✅ Conversione completata: " + outputFile.getAbsolutePath());
+        return outputFile;
     }
 
     // 🔍 Determina il bucket corretto

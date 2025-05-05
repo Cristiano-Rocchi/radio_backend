@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import pizzamafia.radio_backend.entities.Album;
 import pizzamafia.radio_backend.payloads.AlbumRespDTO;
+import pizzamafia.radio_backend.payloads.NewAlbumDTO;
 import pizzamafia.radio_backend.services.AlbumService;
 
 import java.util.List;
@@ -20,16 +21,26 @@ public class AlbumController {
     private AlbumService albumService;
 
     // 1️⃣ CREATE ALBUM (upload album + tracce)
-    @PostMapping
+    @PostMapping(consumes = "multipart/form-data")
     public ResponseEntity<Album> createAlbum(
             @RequestParam String title,
             @RequestParam String artist,
             @RequestParam UUID genreId,
             @RequestParam("songs") List<MultipartFile> songs) {
 
-        Album createdAlbum = albumService.createAlbumFromUpload(title, artist, genreId, songs);
+        // Assembla il DTO a mano
+        NewAlbumDTO albumDTO = new NewAlbumDTO();
+        albumDTO.setTitle(title);
+        albumDTO.setArtist(artist);
+        albumDTO.setGenreId(genreId);
+        albumDTO.setSongs(songs);
+
+        Album createdAlbum = albumService.createAlbumFromUpload(albumDTO);
         return new ResponseEntity<>(createdAlbum, HttpStatus.CREATED);
     }
+
+
+
 
     // 2️⃣ GET ALL ALBUMS (con URL presigned)
     @GetMapping

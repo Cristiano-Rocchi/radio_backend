@@ -10,6 +10,7 @@ import pizzamafia.radio_backend.enums.Subgenre;
 import pizzamafia.radio_backend.exceptions.BadRequestException;
 import pizzamafia.radio_backend.exceptions.InternalServerErrorException;
 import pizzamafia.radio_backend.exceptions.NotFoundException;
+import pizzamafia.radio_backend.payloads.NewSongDTO;
 import pizzamafia.radio_backend.payloads.SongRespDTO;
 import pizzamafia.radio_backend.repositories.AlbumRepository;
 import pizzamafia.radio_backend.repositories.SongRepository;
@@ -23,9 +24,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.URI;
 import java.time.Duration;
 import java.util.*;
@@ -53,7 +52,13 @@ public class SongService {
     private BackblazeB2Config backblazeB2Config;
 
     // 1️⃣ ADD SONGS (aggiunge nuove tracce a un album esistente)
-    public List<SongRespDTO> addSongs(UUID albumId, List<MultipartFile> songs) {
+    public List<SongRespDTO> addSongs(NewSongDTO newSongDTO) {
+
+        UUID albumId = newSongDTO.getAlbumId();
+        List<MultipartFile> songs = newSongDTO.getSongs();
+        Integer rating = newSongDTO.getRating() != null ? newSongDTO.getRating() : 0;
+        Integer level = newSongDTO.getLevel() != null ? newSongDTO.getLevel() : 0;
+        Subgenre subgenre = newSongDTO.getSubgenre();  // può restare null
 
         if (songs == null || songs.isEmpty()) {
             throw new BadRequestException("Devi caricare almeno una traccia audio.");
@@ -78,12 +83,26 @@ public class SongService {
                         + "-" + UUID.randomUUID() + estensione;
 
                 // Scrivi temporaneamente su disco
-                File tempFile = File.createTempFile("upload_", null);
+                File tempFile = File.createTempFile("upload_", estensione);
                 try (FileOutputStream fos = new FileOutputStream(tempFile)) {
                     fos.write(file.getBytes());
                 }
 
-                long fileSize = tempFile.length();
+                // 👇 Conversione se NON è mp3
+                File fileToUpload;
+                if (!estensione.equalsIgnoreCase(".mp3")) {
+                    LOGGER.info("🔄 Converto " + originalFilename + " in mp3...");
+                    fileToUpload = convertToMp3(tempFile);
+                    normalizedFilename = titolo
+                            .trim()
+                            .replaceAll("\\s+", "-")
+                            .replaceAll("[^a-zA-Z0-9\\-]", "")
+                            + "-" + UUID.randomUUID() + ".mp3";
+                } else {
+                    fileToUpload = tempFile;
+                }
+
+                long fileSize = fileToUpload.length();
                 List<String> buckets = new ArrayList<>(keyIdMapping.keySet());
 
                 boolean uploaded = false;
@@ -104,11 +123,10 @@ public class SongService {
                         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                                 .bucket(bucket)
                                 .key(normalizedFilename)
-                                .contentType("audio/mp4")
+                                .contentType("audio/mpeg") // mp3
                                 .build();
 
-
-                        s3Client.putObject(putObjectRequest, RequestBody.fromFile(tempFile));
+                        s3Client.putObject(putObjectRequest, RequestBody.fromFile(fileToUpload));
 
                         LOGGER.info("✅ Caricato su bucket: " + bucket + " | file: " + normalizedFilename);
                         uploaded = true;
@@ -126,11 +144,10 @@ public class SongService {
                 // Salva la canzone nel DB
                 Song song = new Song();
                 song.setTitolo(titolo);
-                song.setRating(0);
-                song.setLevel(0);
-                song.setSubgenre(null);
+                song.setRating(rating);
+                song.setLevel(level);
+                song.setSubgenre(subgenre);
                 song.setAlbum(album);
-                // Salva info bucket e fileName per ricreare il link firmato
                 song.setBucketName(bucketUsed);
                 song.setFileName(normalizedFilename);
 
@@ -139,7 +156,11 @@ public class SongService {
 
                 savedSongs.add(new SongRespDTO(saved.getId(), saved.getTitolo(), presignedUrl));
 
+                // Pulizia file temporanei
                 tempFile.delete();
+                if (fileToUpload != tempFile) {
+                    fileToUpload.delete();
+                }
 
             } catch (Exception e) {
                 throw new InternalServerErrorException("Errore nel salvataggio su Backblaze: " + e.getMessage());
@@ -149,6 +170,44 @@ public class SongService {
         LOGGER.info("✅ Aggiunte " + savedSongs.size() + " tracce all'album: " + album.getTitle());
         return savedSongs;
     }
+
+    // Converte in mp3
+    private File convertToMp3(File inputFile) throws IOException, InterruptedException {
+        String inputFileName = inputFile.getName();
+        String outputFileName = inputFileName.substring(0, inputFileName.lastIndexOf('.')) + ".mp3";
+        File outputFile = new File(inputFile.getParent(), outputFileName);
+
+        ProcessBuilder pb = new ProcessBuilder(
+                "ffmpeg",
+                "-y",
+                "-i", inputFile.getAbsolutePath(),
+                "-vn",
+                "-ar", "44100",
+                "-ac", "2",
+                "-b:a", "192k",
+                outputFile.getAbsolutePath()
+        );
+
+        pb.redirectErrorStream(true);
+        Process process = pb.start();
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                LOGGER.info(line);
+            }
+        }
+
+        int exitCode = process.waitFor();
+        if (exitCode != 0) {
+            throw new IOException("Errore durante la conversione audio. Exit code: " + exitCode);
+        }
+
+        LOGGER.info("✅ Conversione completata: " + outputFile.getAbsolutePath());
+        return outputFile;
+    }
+
+
 
     private long getUsedStorage(String bucketName) {
         S3Client s3Client = backblazeAccounts.get(bucketName);

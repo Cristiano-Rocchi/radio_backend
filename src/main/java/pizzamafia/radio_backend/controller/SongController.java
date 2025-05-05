@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import pizzamafia.radio_backend.enums.Subgenre;
+import pizzamafia.radio_backend.payloads.NewSongDTO;
 import pizzamafia.radio_backend.payloads.SongRespDTO;
 import pizzamafia.radio_backend.services.SongService;
 
@@ -20,14 +21,27 @@ public class SongController {
     private SongService songService;
 
     // 1️⃣ ADD SONGS (ritorna SongRespDTO)
-    @PostMapping("/add/{albumId}")
+    @PostMapping(consumes = "multipart/form-data")
     public ResponseEntity<List<SongRespDTO>> addSongs(
-            @PathVariable UUID albumId,
-            @RequestParam("songs") List<MultipartFile> songs) {
+            @RequestParam UUID albumId,
+            @RequestParam(value = "songs") List<MultipartFile> songs,
+            @RequestParam(required = false) Integer rating,
+            @RequestParam(required = false) Integer level,
+            @RequestParam(required = false) Subgenre subgenre) {
 
-        List<SongRespDTO> addedSongs = songService.addSongs(albumId, songs);
-        return new ResponseEntity<>(addedSongs, HttpStatus.CREATED);
+        // Assembla il DTO manualmente
+        NewSongDTO newSongDTO = new NewSongDTO();
+        newSongDTO.setAlbumId(albumId);
+        newSongDTO.setSongs(songs);
+        newSongDTO.setRating(rating);
+        newSongDTO.setLevel(level);
+        newSongDTO.setSubgenre(subgenre);
+
+        List<SongRespDTO> createdSongs = songService.addSongs(newSongDTO);
+        return new ResponseEntity<>(createdSongs, HttpStatus.CREATED);
     }
+
+
 
     // 2️⃣ GET ALL SONGS (ritorna SongRespDTO)
     @GetMapping
