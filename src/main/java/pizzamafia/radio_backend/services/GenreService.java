@@ -35,13 +35,13 @@ public class GenreService {
     }
 
     // 3️⃣ GET GENRE BY ID
-    public Genre getGenreById(UUID id) {
+    public Genre getGenreById(Long id) {
         return genreRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Genere non trovato con ID: " + id));
     }
 
     // 4️⃣ UPDATE GENRE
-    public Genre updateGenre(UUID id, Genre updatedData) {
+    public Genre updateGenre(Long id, Genre updatedData) {
         Genre genre = genreRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Genere non trovato con ID: " + id));
 
@@ -55,7 +55,7 @@ public class GenreService {
     }
 
     // 5️⃣ DELETE GENRE (con check album)
-    public void deleteGenre(UUID id) {
+    public void deleteGenre(Long id) {
         Genre genre = genreRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Genere non trovato con ID: " + id));
 

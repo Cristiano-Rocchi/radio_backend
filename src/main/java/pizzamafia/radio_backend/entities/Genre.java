@@ -18,9 +18,10 @@ import java.util.UUID;
 public class Genre {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Setter(AccessLevel.NONE)
-    private UUID id;
+    private Long id;
+
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

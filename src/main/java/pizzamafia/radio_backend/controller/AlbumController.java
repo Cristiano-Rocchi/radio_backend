@@ -25,7 +25,7 @@ public class AlbumController {
     public ResponseEntity<Album> createAlbum(
             @RequestParam String title,
             @RequestParam String artist,
-            @RequestParam UUID genreId,
+            @RequestParam Long genreId,
             @RequestParam("songs") List<MultipartFile> songs) {
 
         // Assembla il DTO a mano

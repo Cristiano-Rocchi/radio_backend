@@ -62,7 +62,7 @@ public class AlbumService {
 
         String albumName = newAlbumDTO.getTitle();
         String artist = newAlbumDTO.getArtist();
-        UUID genreId = newAlbumDTO.getGenreId();
+        Long genreId = newAlbumDTO.getGenreId();
         List<MultipartFile> songs = newAlbumDTO.getSongs();
 
         if (albumName == null || albumName.isBlank()) {

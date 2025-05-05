@@ -33,21 +33,21 @@ public class GenreController {
 
     // 3️⃣ GET GENRE BY ID
     @GetMapping("/{id}")
-    public ResponseEntity<Genre> getGenreById(@PathVariable UUID id) {
+    public ResponseEntity<Genre> getGenreById(@PathVariable Long id) {
         Genre genre = genreService.getGenreById(id);
         return ResponseEntity.ok(genre);
     }
 
     // 4️⃣ UPDATE GENRE
     @PutMapping("/{id}")
-    public ResponseEntity<Genre> updateGenre(@PathVariable UUID id, @RequestBody Genre updatedData) {
+    public ResponseEntity<Genre> updateGenre(@PathVariable Long id, @RequestBody Genre updatedData) {
         Genre updatedGenre = genreService.updateGenre(id, updatedData);
         return ResponseEntity.ok(updatedGenre);
     }
 
     // 5️⃣ DELETE GENRE
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteGenre(@PathVariable UUID id) {
+    public ResponseEntity<Void> deleteGenre(@PathVariable Long id) {
         genreService.deleteGenre(id);
         return ResponseEntity.noContent().build();
     }

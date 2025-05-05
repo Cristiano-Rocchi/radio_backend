@@ -10,6 +10,6 @@ import java.util.UUID;
 public class NewAlbumDTO {
     private String title;
     private String artist;
-    private UUID genreId;
+    private Long genreId;
     private List<MultipartFile> songs;
 }
