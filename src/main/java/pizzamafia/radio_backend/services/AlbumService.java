@@ -275,7 +275,12 @@ public class AlbumService {
         return albums.stream().map(album -> {
             List<SongRespDTO> songDtos = album.getSongs().stream().map(song -> {
                 String presignedUrl = generatePresignedUrl(song.getBucketName(), song.getFileName());
-                return new SongRespDTO(song.getId(), song.getTitolo(), presignedUrl);
+                return new SongRespDTO(
+                        song.getId(),
+                        song.getTitolo(),
+                        presignedUrl,
+                        song.getBucketName()  // 👈 aggiunto qui
+                );
             }).collect(Collectors.toList());
 
             return new AlbumRespDTO(
@@ -289,6 +294,7 @@ public class AlbumService {
         }).collect(Collectors.toList());
     }
 
+
     // ✅ GET ONE con presigned URL
     public AlbumRespDTO getAlbumByIdWithPresignedUrls(UUID id) {
         Album album = albumRepository.findById(id)
@@ -296,7 +302,12 @@ public class AlbumService {
 
         List<SongRespDTO> songDtos = album.getSongs().stream().map(song -> {
             String presignedUrl = generatePresignedUrl(song.getBucketName(), song.getFileName());
-            return new SongRespDTO(song.getId(), song.getTitolo(), presignedUrl);
+            return new SongRespDTO(
+                    song.getId(),
+                    song.getTitolo(),
+                    presignedUrl,
+                    song.getBucketName()  // 👈 aggiunto qui
+            );
         }).collect(Collectors.toList());
 
         return new AlbumRespDTO(
@@ -308,6 +319,7 @@ public class AlbumService {
                 songDtos
         );
     }
+
 
     // 🔑 Genera URL firmato
     public String generatePresignedUrl(String bucketName, String fileName) {

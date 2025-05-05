@@ -154,7 +154,14 @@ public class SongService {
                 Song saved = songRepository.save(song);
                 String presignedUrl = generatePresignedUrl(bucketUsed, normalizedFilename);
 
-                savedSongs.add(new SongRespDTO(saved.getId(), saved.getTitolo(), presignedUrl));
+                savedSongs.add(new SongRespDTO(
+                        saved.getId(),
+                        saved.getTitolo(),
+                        presignedUrl,
+                        saved.getBucketName()
+                ));
+
+
 
                 // Pulizia file temporanei
                 tempFile.delete();
@@ -233,10 +240,12 @@ public class SongService {
                 .map(song -> new SongRespDTO(
                         song.getId(),
                         song.getTitolo(),
-                        generatePresignedUrl(song.getBucketName(), song.getFileName())
+                        generatePresignedUrl(song.getBucketName(), song.getFileName()),
+                        song.getBucketName()
                 ))
                 .collect(Collectors.toList());
     }
+
 
     // 3️⃣ GET SONG BY ID (con presigned URL)
     public SongRespDTO getSongById(UUID id) {
@@ -246,9 +255,11 @@ public class SongService {
         return new SongRespDTO(
                 song.getId(),
                 song.getTitolo(),
-                generatePresignedUrl(song.getBucketName(), song.getFileName())
+                generatePresignedUrl(song.getBucketName(), song.getFileName()),
+                song.getBucketName()
         );
     }
+
 
     // 4️⃣ DELETE SONG
     public void deleteSong(UUID id) {
