@@ -3,8 +3,11 @@ package pizzamafia.radio_backend.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pizzamafia.radio_backend.entities.Genre;
+import pizzamafia.radio_backend.enums.GenreType;
 import pizzamafia.radio_backend.exceptions.BadRequestException;
 import pizzamafia.radio_backend.exceptions.NotFoundException;
+import pizzamafia.radio_backend.payloads.GenreRespDTO;
+import pizzamafia.radio_backend.payloads.NewGenreDTO;
 import pizzamafia.radio_backend.repositories.GenreRepository;
 
 import java.util.List;
@@ -20,39 +23,53 @@ public class GenreService {
     private GenreRepository genreRepository;
 
     // 1️⃣ CREATE GENRE
-    public Genre createGenre(Genre genre) {
-        if (genre.getName() == null) {
-            throw new BadRequestException("Il nome del genere (enum) è obbligatorio.");
+    public GenreRespDTO createGenre(NewGenreDTO newGenreDTO) {
+        if (newGenreDTO.getName() == null || newGenreDTO.getName().isBlank()) {
+            throw new BadRequestException("Il nome del genere è obbligatorio.");
         }
+
+        Genre genre = new Genre();
+        genre.setName(GenreType.valueOf(newGenreDTO.getName().toUpperCase()));  // Attenzione: controlla che la stringa sia valida
+
         Genre savedGenre = genreRepository.save(genre);
         LOGGER.info("✅ Genere creato: " + savedGenre.getName());
-        return savedGenre;
+
+        return new GenreRespDTO(savedGenre.getId(), savedGenre.getName().name());
     }
+
 
     // 2️⃣ GET ALL GENRES
-    public List<Genre> getAllGenres() {
-        return genreRepository.findAll();
+    public List<GenreRespDTO> getAllGenres() {
+        return genreRepository.findAll().stream()
+                .map(g -> new GenreRespDTO(g.getId(), g.getName().name()))
+                .toList();
     }
+
 
     // 3️⃣ GET GENRE BY ID
-    public Genre getGenreById(Long id) {
-        return genreRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Genere non trovato con ID: " + id));
-    }
-
-    // 4️⃣ UPDATE GENRE
-    public Genre updateGenre(Long id, Genre updatedData) {
+    public GenreRespDTO getGenreById(Long id) {
         Genre genre = genreRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Genere non trovato con ID: " + id));
 
-        if (updatedData.getName() != null) {
-            genre.setName(updatedData.getName());
+        return new GenreRespDTO(genre.getId(), genre.getName().name());
+    }
+
+
+    // 4️⃣ UPDATE GENRE
+    public GenreRespDTO updateGenre(Long id, NewGenreDTO updatedData) {
+        Genre genre = genreRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Genere non trovato con ID: " + id));
+
+        if (updatedData.getName() != null && !updatedData.getName().isBlank()) {
+            genre.setName(GenreType.valueOf(updatedData.getName().toUpperCase()));
         }
 
         Genre updatedGenre = genreRepository.save(genre);
         LOGGER.info("✅ Genere aggiornato: " + updatedGenre.getName());
-        return updatedGenre;
+
+        return new GenreRespDTO(updatedGenre.getId(), updatedGenre.getName().name());
     }
+
 
     // 5️⃣ DELETE GENRE (con check album)
     public void deleteGenre(Long id) {

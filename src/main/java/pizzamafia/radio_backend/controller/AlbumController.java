@@ -46,10 +46,28 @@ public class AlbumController {
 
     // 2️⃣ GET ALL ALBUMS (con URL presigned)
     @GetMapping
-    public ResponseEntity<List<AlbumRespDTO>> getAllAlbums() {
-        List<AlbumRespDTO> albums = albumService.getAllAlbumsWithPresignedUrls();
+    public ResponseEntity<List<AlbumRespDTO>> getAlbums(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String artist
+    ) {
+        List<AlbumRespDTO> albums;
+
+        if (title != null && !title.isBlank() && artist != null && !artist.isBlank()) {
+            // ricerca combinata
+            albums = albumService.searchAlbumsByTitleAndArtist(title, artist);
+        } else if (title != null && !title.isBlank()) {
+            albums = albumService.searchAlbumsByTitle(title);
+        } else if (artist != null && !artist.isBlank()) {
+            albums = albumService.searchAlbumsByArtist(artist);
+        } else {
+            albums = albumService.getAllAlbumsWithPresignedUrls();
+        }
+
         return ResponseEntity.ok(albums);
     }
+
+
+
 
     // 3️⃣ GET ALBUM BY ID (con URL presigned)
     @GetMapping("/{id}")

@@ -15,6 +15,8 @@ public class AlbumRespDTO {
     private String title;
     private String artist;
     private Integer rating;
-    private Integer year;
+    private Integer date;
+    private Long genreId;  // 👈 AGGIUNGI QUESTO
     private List<SongRespDTO> songs;
 }
+

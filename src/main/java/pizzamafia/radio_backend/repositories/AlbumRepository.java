@@ -10,5 +10,11 @@ import java.util.UUID;
 @Repository
 public interface AlbumRepository extends JpaRepository<Album, UUID> {
 
+    List<Album> findByTitleContainingIgnoreCase(String title);
+    List<Album> findByArtistContainingIgnoreCase(String artist);
+    List<Album> findByTitleContainingIgnoreCaseAndArtistContainingIgnoreCase(String title, String artist);
+
+
+
 
 }

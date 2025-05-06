@@ -310,6 +310,7 @@ public class AlbumService {
                     album.getArtist(),
                     album.getRating(),
                     album.getDate(),
+                    album.getGenre().getId(),
                     songDtos
             );
         }).collect(Collectors.toList());
@@ -339,6 +340,7 @@ public class AlbumService {
                 album.getArtist(),
                 album.getRating(),
                 album.getDate(),
+                album.getGenre().getId(),
                 songDtos
         );
     }
@@ -416,6 +418,93 @@ public class AlbumService {
         LOGGER.info("✅ Album aggiornato con successo: " + updatedAlbum.getId());
         return updatedAlbum;
     }
+
+
+    //cerca per titolo album
+    public List<AlbumRespDTO> searchAlbumsByTitle(String query) {
+        List<Album> albums = albumRepository.findByTitleContainingIgnoreCase(query);
+
+        return albums.stream().map(album -> {
+            List<SongRespDTO> songDtos = album.getSongs().stream().map(song -> {
+                String presignedUrl = generatePresignedUrl(song.getBucketName(), song.getFileName());
+                return new SongRespDTO(
+                        song.getId(),
+                        song.getTitolo(),
+                        presignedUrl,
+                        song.getBucketName(),
+                        song.getDuration()
+                );
+            }).toList();
+
+            return new AlbumRespDTO(
+                    album.getId(),
+                    album.getTitle(),
+                    album.getArtist(),
+                    album.getRating(),
+                    album.getDate(),
+                    album.getGenre().getId(),
+                    songDtos
+            );
+        }).toList();
+    }
+
+    //cerca per artista
+    public List<AlbumRespDTO> searchAlbumsByArtist(String artist) {
+        List<Album> albums = albumRepository.findByArtistContainingIgnoreCase(artist);
+
+        return albums.stream().map(album -> {
+            List<SongRespDTO> songDtos = album.getSongs().stream().map(song -> {
+                String presignedUrl = generatePresignedUrl(song.getBucketName(), song.getFileName());
+                return new SongRespDTO(
+                        song.getId(),
+                        song.getTitolo(),
+                        presignedUrl,
+                        song.getBucketName(),
+                        song.getDuration()
+                );
+            }).toList();
+
+            return new AlbumRespDTO(
+                    album.getId(),
+                    album.getTitle(),
+                    album.getArtist(),
+                    album.getRating(),
+                    album.getDate(),
+                    album.getGenre().getId(),
+                    songDtos
+            );
+        }).toList();
+    }
+
+
+    //ricerca per titolo album e artista
+    public List<AlbumRespDTO> searchAlbumsByTitleAndArtist(String title, String artist) {
+        List<Album> albums = albumRepository.findByTitleContainingIgnoreCaseAndArtistContainingIgnoreCase(title, artist);
+
+        return albums.stream().map(album -> {
+            List<SongRespDTO> songDtos = album.getSongs().stream().map(song -> {
+                String presignedUrl = generatePresignedUrl(song.getBucketName(), song.getFileName());
+                return new SongRespDTO(
+                        song.getId(),
+                        song.getTitolo(),
+                        presignedUrl,
+                        song.getBucketName(),
+                        song.getDuration()
+                );
+            }).toList();
+
+            return new AlbumRespDTO(
+                    album.getId(),
+                    album.getTitle(),
+                    album.getArtist(),
+                    album.getRating(),
+                    album.getDate(),
+                    album.getGenre().getId(),
+                    songDtos
+            );
+        }).toList();
+    }
+
 
 
 }
