@@ -165,7 +165,10 @@ public class SongService {
                         saved.getTitolo(),
                         presignedUrl,
                         saved.getBucketName(),
-                        saved.getDuration()
+                        saved.getDuration(),
+                        saved.getRating(),
+                        saved.getLevel(),
+                        saved.getAlbum().getId()
                 ));
 
 
@@ -263,7 +266,11 @@ public class SongService {
                         song.getTitolo(),
                         generatePresignedUrl(song.getBucketName(), song.getFileName()),
                         song.getBucketName(),
-                        song.getDuration()   // 👈 aggiunto qui
+                        song.getDuration(),
+                        song.getRating(),
+                        song.getLevel(),
+                        song.getAlbum().getId()
+
                 ))
                 .collect(Collectors.toList());
     }
@@ -280,7 +287,10 @@ public class SongService {
                 song.getTitolo(),
                 generatePresignedUrl(song.getBucketName(), song.getFileName()),
                 song.getBucketName(),
-                song.getDuration()   // 👈 aggiunto qui
+                song.getDuration(),
+                song.getRating(),
+                song.getLevel(),
+                song.getAlbum().getId()
         );
     }
 

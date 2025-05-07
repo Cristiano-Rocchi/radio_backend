@@ -300,7 +300,10 @@ public class AlbumService {
                         song.getTitolo(),
                         presignedUrl,
                         song.getBucketName(),
-                        song.getDuration()   // 👈 aggiunto qui
+                        song.getDuration(),
+                        song.getRating(),
+                        song.getLevel(),
+                        song.getAlbum().getId()
                 );
             }).collect(Collectors.toList());
 
@@ -330,7 +333,10 @@ public class AlbumService {
                     song.getTitolo(),
                     presignedUrl,
                     song.getBucketName(),
-                    song.getDuration()   // 👈 aggiunto qui
+                    song.getDuration(),
+                    song.getRating(),
+                    song.getLevel(),
+                    song.getAlbum().getId()
             );
         }).collect(Collectors.toList());
 
@@ -432,7 +438,10 @@ public class AlbumService {
                         song.getTitolo(),
                         presignedUrl,
                         song.getBucketName(),
-                        song.getDuration()
+                        song.getDuration(),
+                        song.getRating(),
+                        song.getLevel(),
+                        song.getAlbum().getId()
                 );
             }).toList();
 
@@ -460,7 +469,10 @@ public class AlbumService {
                         song.getTitolo(),
                         presignedUrl,
                         song.getBucketName(),
-                        song.getDuration()
+                        song.getDuration(),
+                        song.getRating(),
+                        song.getLevel(),
+                        song.getAlbum().getId()
                 );
             }).toList();
 
@@ -489,7 +501,10 @@ public class AlbumService {
                         song.getTitolo(),
                         presignedUrl,
                         song.getBucketName(),
-                        song.getDuration()
+                        song.getDuration(),
+                        song.getRating(),
+                        song.getLevel(),
+                        song.getAlbum().getId()
                 );
             }).toList();
 

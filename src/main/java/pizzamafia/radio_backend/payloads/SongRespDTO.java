@@ -15,5 +15,8 @@ public class SongRespDTO {
     private String presignedUrl;
     private String bucketName;
     private Integer duration;
+    private Integer rating;  
+    private Integer level;
+    private UUID albumId;
 
 }

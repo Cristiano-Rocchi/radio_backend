@@ -1,11 +1,13 @@
 package pizzamafia.radio_backend.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import pizzamafia.radio_backend.enums.Subgenre;
+import pizzamafia.radio_backend.exceptions.BadRequestException;
 import pizzamafia.radio_backend.payloads.NewSongDTO;
 import pizzamafia.radio_backend.payloads.SongRespDTO;
 import pizzamafia.radio_backend.services.SongService;
@@ -23,23 +25,12 @@ public class SongController {
     // 1️⃣ ADD SONGS (ritorna SongRespDTO)
     @PostMapping(consumes = "multipart/form-data")
     public ResponseEntity<List<SongRespDTO>> addSongs(
-            @RequestParam UUID albumId,
-            @RequestParam(value = "songs") List<MultipartFile> songs,
-            @RequestParam(required = false) Integer rating,
-            @RequestParam(required = false) Integer level,
-            @RequestParam(required = false) Subgenre subgenre) {
-
-        // Assembla il DTO manualmente
-        NewSongDTO newSongDTO = new NewSongDTO();
-        newSongDTO.setAlbumId(albumId);
-        newSongDTO.setSongs(songs);
-        newSongDTO.setRating(rating);
-        newSongDTO.setLevel(level);
-        newSongDTO.setSubgenre(subgenre);
-
+            @Valid @ModelAttribute NewSongDTO newSongDTO
+    ) {
         List<SongRespDTO> createdSongs = songService.addSongs(newSongDTO);
         return new ResponseEntity<>(createdSongs, HttpStatus.CREATED);
     }
+
 
 
 
@@ -73,7 +64,16 @@ public class SongController {
             @RequestParam(required = false) Integer level,
             @RequestParam(required = false) Subgenre subgenre) {
 
+        // ✅ Validazione manuale
+        if (rating != null && (rating < 0 || rating > 5)) {
+            throw new BadRequestException("Il rating deve essere compreso tra 0 e 5.");
+        }
+        if (level != null && (level < 0 || level > 100)) {
+            throw new BadRequestException("Il level deve essere compreso tra 0 e 100.");
+        }
+
         songService.updateSong(id, title, rating, level, subgenre);
         return ResponseEntity.ok("✅ Canzone aggiornata");
     }
+
 }
