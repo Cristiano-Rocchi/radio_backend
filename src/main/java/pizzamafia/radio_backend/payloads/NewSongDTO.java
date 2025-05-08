@@ -16,7 +16,7 @@ public class NewSongDTO {
 
     // opzionali:
     @Min(0)
-    @Max(5)
+    @Max(10)
     private Integer rating;//  0 di default
 
     @Min(0)

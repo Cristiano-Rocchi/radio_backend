@@ -65,7 +65,7 @@ public class SongController {
             @RequestParam(required = false) Subgenre subgenre) {
 
         // ✅ Validazione manuale
-        if (rating != null && (rating < 0 || rating > 5)) {
+        if (rating != null && (rating < 0 || rating > 10)) {
             throw new BadRequestException("Il rating deve essere compreso tra 0 e 5.");
         }
         if (level != null && (level < 0 || level > 100)) {
