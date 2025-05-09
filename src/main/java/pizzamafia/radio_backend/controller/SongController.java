@@ -10,6 +10,7 @@ import pizzamafia.radio_backend.enums.Subgenre;
 import pizzamafia.radio_backend.exceptions.BadRequestException;
 import pizzamafia.radio_backend.payloads.NewSongDTO;
 import pizzamafia.radio_backend.payloads.SongRespDTO;
+import pizzamafia.radio_backend.payloads.UpdateSongDTO;
 import pizzamafia.radio_backend.services.SongService;
 
 import java.util.List;
@@ -59,21 +60,25 @@ public class SongController {
     @PutMapping("/{id}")
     public ResponseEntity<String> updateSong(
             @PathVariable UUID id,
-            @RequestParam(required = false) String title,
-            @RequestParam(required = false) Integer rating,
-            @RequestParam(required = false) Integer level,
-            @RequestParam(required = false) Subgenre subgenre) {
+            @RequestBody UpdateSongDTO dto) {
 
-        // ✅ Validazione manuale
-        if (rating != null && (rating < 0 || rating > 10)) {
-            throw new BadRequestException("Il rating deve essere compreso tra 0 e 5.");
+        if (dto.getRating() != null && (dto.getRating() < 0 || dto.getRating() > 10)) {
+            throw new BadRequestException("Il rating deve essere compreso tra 0 e 10.");
         }
-        if (level != null && (level < 0 || level > 100)) {
+        if (dto.getLevel() != null && (dto.getLevel() < 0 || dto.getLevel() > 100)) {
             throw new BadRequestException("Il level deve essere compreso tra 0 e 100.");
         }
 
-        songService.updateSong(id, title, rating, level, subgenre);
+        songService.updateSong(
+                id,
+                dto.getTitolo(),
+                dto.getRating(),
+                dto.getLevel(),
+                dto.getSubgenre()
+        );
         return ResponseEntity.ok("✅ Canzone aggiornata");
     }
+
+
 
 }
