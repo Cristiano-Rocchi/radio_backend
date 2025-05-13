@@ -74,7 +74,9 @@ public class PlaylistService {
                         song.getDuration(),
                         song.getRating(),
                         song.getLevel(),
-                        song.getAlbum().getId()
+                        song.getAlbum().getId(),
+                        song.getAlbum().getTitle(),
+                        song.getAlbum().getArtist()
                 ))
                 .toList();
 

@@ -303,7 +303,9 @@ public class AlbumService {
                         song.getDuration(),
                         song.getRating(),
                         song.getLevel(),
-                        song.getAlbum().getId()
+                        song.getAlbum().getId(),
+                        song.getAlbum().getTitle(),
+                        song.getAlbum().getTitle()
                 );
             }).collect(Collectors.toList());
 
@@ -336,7 +338,9 @@ public class AlbumService {
                     song.getDuration(),
                     song.getRating(),
                     song.getLevel(),
-                    song.getAlbum().getId()
+                    song.getAlbum().getId(),
+                    song.getAlbum().getTitle(),
+                    song.getAlbum().getArtist()
             );
         }).collect(Collectors.toList());
 
@@ -441,7 +445,9 @@ public class AlbumService {
                         song.getDuration(),
                         song.getRating(),
                         song.getLevel(),
-                        song.getAlbum().getId()
+                        song.getAlbum().getId(),
+                        song.getAlbum().getTitle(),
+                        song.getAlbum().getArtist()
                 );
             }).toList();
 
@@ -472,7 +478,9 @@ public class AlbumService {
                         song.getDuration(),
                         song.getRating(),
                         song.getLevel(),
-                        song.getAlbum().getId()
+                        song.getAlbum().getId(),
+                        song.getAlbum().getTitle(),
+                        song.getAlbum().getArtist()
                 );
             }).toList();
 
@@ -504,7 +512,9 @@ public class AlbumService {
                         song.getDuration(),
                         song.getRating(),
                         song.getLevel(),
-                        song.getAlbum().getId()
+                        song.getAlbum().getId(),
+                        song.getAlbum().getTitle(),
+                        song.getAlbum().getArtist()
                 );
             }).toList();
 

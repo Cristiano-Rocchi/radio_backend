@@ -79,6 +79,13 @@ public class SongController {
         return ResponseEntity.ok("✅ Canzone aggiornata");
     }
 
+    // Ricerca
+    @GetMapping("/search")
+    public List<SongRespDTO> searchSongsByTitle(@RequestParam String title) {
+        return songService.searchByTitle(title);
+    }
+
+
 
 
 }

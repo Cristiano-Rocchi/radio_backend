@@ -168,7 +168,9 @@ public class SongService {
                         saved.getDuration(),
                         saved.getRating(),
                         saved.getLevel(),
-                        saved.getAlbum().getId()
+                        saved.getAlbum().getId(),
+                        saved.getAlbum().getTitle(),
+                        saved.getAlbum().getArtist()
                 ));
 
 
@@ -269,7 +271,9 @@ public class SongService {
                         song.getDuration(),
                         song.getRating(),
                         song.getLevel(),
-                        song.getAlbum().getId()
+                        song.getAlbum().getId(),
+                        song.getAlbum().getTitle(),
+                        song.getAlbum().getArtist()
 
                 ))
                 .collect(Collectors.toList());
@@ -290,7 +294,9 @@ public class SongService {
                 song.getDuration(),
                 song.getRating(),
                 song.getLevel(),
-                song.getAlbum().getId()
+                song.getAlbum().getId(),
+                song.getAlbum().getTitle(),
+                song.getAlbum().getArtist()
         );
     }
 
@@ -357,4 +363,22 @@ public class SongService {
             return presignedRequest.url().toString();
         }
     }
+
+    public List<SongRespDTO> searchByTitle(String titolo) {
+        return songRepository.findByTitoloContainingIgnoreCase(titolo).stream()
+                .map(song -> new SongRespDTO(
+                        song.getId(),
+                        song.getTitolo(),
+                        generatePresignedUrl(song.getBucketName(), song.getFileName()),
+                        song.getBucketName(),
+                        song.getDuration(),
+                        song.getRating(),
+                        song.getLevel(),
+                        song.getAlbum().getId(),
+                        song.getAlbum().getTitle(),
+                        song.getAlbum().getArtist()
+                ))
+                .toList();
+    }
+
 }
