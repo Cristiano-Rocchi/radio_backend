@@ -29,5 +29,9 @@ public class Playlist {
             inverseJoinColumns = @JoinColumn(name = "song_id")
     )
     private List<Song> songs = new ArrayList<>();
+
+    @OneToMany(mappedBy = "playlist", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PlaylistSong> playlistSongs = new ArrayList<>();
+
 }
 
