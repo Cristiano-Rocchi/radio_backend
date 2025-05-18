@@ -1,5 +1,6 @@
 package pizzamafia.radio_backend.services;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pizzamafia.radio_backend.entities.Playlist;
@@ -78,12 +79,24 @@ public class PlaylistService {
     }
 
     // 🔹 DELETE playlist
+    @Transactional
     public void deletePlaylist(Long id) {
-        if (!playlistRepository.existsById(id)) {
-            throw new NotFoundException("Playlist non trovata con ID: " + id);
-        }
-        playlistRepository.deleteById(id);
+        Playlist playlist = playlistRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Playlist non trovata con ID: " + id));
+
+        // Carica esplicitamente tutti i PlaylistSong
+        List<PlaylistSong> playlistSongs = playlistSongRepository.findByPlaylistOrderByPositionAsc(playlist);
+
+        // Elimina direttamente i PlaylistSong associati
+        playlistSongRepository.deleteAll(playlistSongs);
+
+        // Elimina la playlist
+        playlistRepository.delete(playlist);
     }
+
+
+
+
 
     // 🔁 mapping interno
     private PlaylistRespDTO toRespDTO(Playlist playlist) {
@@ -110,7 +123,15 @@ public class PlaylistService {
         return new PlaylistRespDTO(playlist.getId(), playlist.getName(), tracks);
     }
 
+    // 🔹 MODIFICA NOME playlist
+    public void updatePlaylistName(Long id, String name) {
+        Playlist playlist = playlistRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Playlist non trovata"));
+        playlist.setName(name);
+        playlistRepository.save(playlist);
+    }
 
+    // MODIFICA ORDNE
     public void updatePlaylistOrder(Long playlistId, List<UUID> orderedSongIds) {
         Playlist playlist = playlistRepository.findById(playlistId)
                 .orElseThrow(() -> new NotFoundException("Playlist non trovata"));

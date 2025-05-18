@@ -9,6 +9,7 @@ import pizzamafia.radio_backend.payloads.PlaylistRespDTO;
 import pizzamafia.radio_backend.services.PlaylistService;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -44,6 +45,17 @@ public class PlaylistController {
     public ResponseEntity<Void> deletePlaylist(@PathVariable Long id) {
         playlistService.deletePlaylist(id);
         return ResponseEntity.noContent().build();
+    }
+
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Void> updatePlaylistName(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> payload
+    ) {
+        String name = payload.get("name");
+        playlistService.updatePlaylistName(id, name);
+        return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{playlistId}/order")

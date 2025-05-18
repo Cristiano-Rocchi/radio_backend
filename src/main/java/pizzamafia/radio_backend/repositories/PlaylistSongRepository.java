@@ -10,4 +10,7 @@ import java.util.List;
 @Repository
 public interface PlaylistSongRepository extends JpaRepository<PlaylistSong, Long> {
     List<PlaylistSong> findByPlaylistOrderByPositionAsc(Playlist playlist);
+
+    // Serve per rimuovere i legami prima di eliminare la playlist
+    void deleteAllByPlaylist(Playlist playlist);
 }
