@@ -374,7 +374,7 @@ public class AlbumService {
                     .build();
 
             PresignedGetObjectRequest presignedRequest = presigner.presignGetObject(r ->
-                    r.signatureDuration(Duration.ofHours(1))
+                    r.signatureDuration(Duration.ofHours(6))
                             .getObjectRequest(getObjectRequest));
 
             return presignedRequest.url().toString();

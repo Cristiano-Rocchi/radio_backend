@@ -18,7 +18,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());  // 🔓 Tutto aperto
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());  // Tutto aperto
 
         return http.build();
     }
@@ -26,7 +26,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));  // 👈 solo frontend locale
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));  // solo frontend locale
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));  // Tutti gli header accettati
         configuration.setAllowCredentials(false);  // Tanto non usi cookie/sessioni

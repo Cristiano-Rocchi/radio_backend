@@ -14,6 +14,7 @@ import pizzamafia.radio_backend.repositories.PlaylistRepository;
 import pizzamafia.radio_backend.repositories.PlaylistSongRepository;
 import pizzamafia.radio_backend.repositories.SongRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -37,30 +38,33 @@ public class PlaylistService {
 
     // 🔹 CREA playlist
     public PlaylistRespDTO createPlaylist(NewPlaylistDTO dto) {
-        List<Song> songs = songRepository.findAllById(dto.getSongIds());
+        List<UUID> songIds = dto.getSongIds();
 
         Playlist playlist = new Playlist();
         playlist.setName(dto.getName());
 
-        // 🔁 Costruisci PlaylistSong ordinati
-        List<PlaylistSong> playlistSongs = new java.util.ArrayList<>();
-        for (int i = 0; i < songs.size(); i++) {
+        // 🔁 Costruisci PlaylistSong nell'ordine ricevuto
+        List<PlaylistSong> playlistSongs = new ArrayList<>();
+        for (int i = 0; i < songIds.size(); i++) {
+            UUID songId = songIds.get(i);
+            Song song = songRepository.findById(songId)
+                    .orElseThrow(() -> new NotFoundException("Canzone non trovata con ID: " + songId));
+
             PlaylistSong ps = new PlaylistSong();
             ps.setPlaylist(playlist);
-            ps.setSong(songs.get(i));
-            ps.setPosition(i);
+            ps.setSong(song);
+            ps.setPosition(i); // ✅ Mantieni l'ordine esatto
             playlistSongs.add(ps);
         }
 
         playlist.setPlaylistSongs(playlistSongs);
-
-
 
         Playlist saved = playlistRepository.save(playlist);
         playlistSongRepository.saveAll(playlistSongs);
 
         return toRespDTO(saved);
     }
+
 
 
     // 🔹 GET playlist by ID
@@ -92,6 +96,20 @@ public class PlaylistService {
 
         // Elimina la playlist
         playlistRepository.delete(playlist);
+    }
+
+
+    @Transactional
+    public void removeSongFromPlaylist(Long playlistId, UUID songId) {
+        Playlist playlist = playlistRepository.findById(playlistId)
+                .orElseThrow(() -> new NotFoundException("Playlist non trovata"));
+
+        Song song = songRepository.findById(songId)
+                .orElseThrow(() -> new NotFoundException("Canzone non trovata"));
+
+        playlist.getPlaylistSongs().removeIf(ps -> ps.getSong().equals(song));
+
+        playlistRepository.save(playlist);
     }
 
 
