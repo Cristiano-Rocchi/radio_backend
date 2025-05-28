@@ -116,7 +116,7 @@ public class PlaylistService {
 
 
 
-    // 🔁 mapping interno
+    // mapping interno
     private PlaylistRespDTO toRespDTO(Playlist playlist) {
         List<SongRespDTO> tracks = playlist.getPlaylistSongs().stream()
                 .sorted((ps1, ps2) -> Integer.compare(ps1.getPosition(), ps2.getPosition()))
@@ -149,7 +149,30 @@ public class PlaylistService {
         playlistRepository.save(playlist);
     }
 
-    // MODIFICA ORDNE
+    // 🔹 Aggiunge Song
+    public void addSongsToPlaylist(Long playlistId, List<UUID> songIds) {
+        Playlist playlist = playlistRepository.findById(playlistId)
+                .orElseThrow(() -> new NotFoundException("Playlist non trovata"));
+
+        int startPosition = playlist.getPlaylistSongs().size();
+
+        for (int i = 0; i < songIds.size(); i++) {
+            UUID songId = songIds.get(i);
+            Song song = songRepository.findById(songId)
+                    .orElseThrow(() -> new NotFoundException("Canzone non trovata"));
+
+            PlaylistSong ps = new PlaylistSong();
+            ps.setPlaylist(playlist);
+            ps.setSong(song);
+            ps.setPosition(startPosition + i);
+            playlist.getPlaylistSongs().add(ps);
+        }
+
+        playlistRepository.save(playlist);
+    }
+
+
+    // 🔹MODIFICA ORDNE
     public void updatePlaylistOrder(Long playlistId, List<UUID> orderedSongIds) {
         Playlist playlist = playlistRepository.findById(playlistId)
                 .orElseThrow(() -> new NotFoundException("Playlist non trovata"));

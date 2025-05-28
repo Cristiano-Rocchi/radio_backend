@@ -3,7 +3,6 @@ package pizzamafia.radio_backend.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pizzamafia.radio_backend.entities.Genre;
-import pizzamafia.radio_backend.enums.GenreType;
 import pizzamafia.radio_backend.exceptions.BadRequestException;
 import pizzamafia.radio_backend.exceptions.NotFoundException;
 import pizzamafia.radio_backend.payloads.GenreRespDTO;
@@ -29,19 +28,22 @@ public class GenreService {
         }
 
         Genre genre = new Genre();
-        genre.setName(GenreType.valueOf(newGenreDTO.getName().toUpperCase()));  // Attenzione: controlla che la stringa sia valida
+        genre.setName(newGenreDTO.getName().toUpperCase());
+
 
         Genre savedGenre = genreRepository.save(genre);
         LOGGER.info("✅ Genere creato: " + savedGenre.getName());
 
-        return new GenreRespDTO(savedGenre.getId(), savedGenre.getName().name());
+        return new GenreRespDTO(savedGenre.getId(), savedGenre.getName());
+
     }
 
 
     // 2️⃣ GET ALL GENRES
     public List<GenreRespDTO> getAllGenres() {
         return genreRepository.findAll().stream()
-                .map(g -> new GenreRespDTO(g.getId(), g.getName().name()))
+                .map(g -> new GenreRespDTO(g.getId(), g.getName()))
+
                 .toList();
     }
 
@@ -51,7 +53,8 @@ public class GenreService {
         Genre genre = genreRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Genere non trovato con ID: " + id));
 
-        return new GenreRespDTO(genre.getId(), genre.getName().name());
+        return new GenreRespDTO(genre.getId(), genre.getName());
+
     }
 
 
@@ -61,13 +64,15 @@ public class GenreService {
                 .orElseThrow(() -> new NotFoundException("Genere non trovato con ID: " + id));
 
         if (updatedData.getName() != null && !updatedData.getName().isBlank()) {
-            genre.setName(GenreType.valueOf(updatedData.getName().toUpperCase()));
+            genre.setName(updatedData.getName().toUpperCase());
+
         }
 
         Genre updatedGenre = genreRepository.save(genre);
         LOGGER.info("✅ Genere aggiornato: " + updatedGenre.getName());
 
-        return new GenreRespDTO(updatedGenre.getId(), updatedGenre.getName().name());
+        return new GenreRespDTO(updatedGenre.getId(), updatedGenre.getName());
+
     }
 
 

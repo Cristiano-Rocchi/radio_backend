@@ -2,11 +2,11 @@ package pizzamafia.radio_backend.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
-import pizzamafia.radio_backend.enums.GenreType;
+
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
+
 
 
 @Entity
@@ -23,9 +23,9 @@ public class Genre {
     private Long id;
 
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private GenreType name;
+    private String name;
+
 
     @OneToMany(mappedBy = "genre", cascade = CascadeType.ALL)
     private List<Album> albums = new ArrayList<>();
