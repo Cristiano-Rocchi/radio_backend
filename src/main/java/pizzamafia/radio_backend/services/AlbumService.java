@@ -14,6 +14,7 @@ import pizzamafia.radio_backend.exceptions.NotFoundException;
 import pizzamafia.radio_backend.payloads.AlbumRespDTO;
 import pizzamafia.radio_backend.payloads.NewAlbumDTO;
 import pizzamafia.radio_backend.payloads.SongRespDTO;
+import pizzamafia.radio_backend.payloads.UpdateAlbumDTO;
 import pizzamafia.radio_backend.repositories.AlbumRepository;
 import pizzamafia.radio_backend.repositories.GenreRepository;
 import pizzamafia.radio_backend.repositories.SongRepository;
@@ -410,23 +411,26 @@ public class AlbumService {
     }
 
     // 5️⃣ UPDATE ALBUM (mantiene le tracce intatte)
-    public Album updateAlbum(UUID id, String newTitle, String newArtist, Integer newRating) {
+    public void updateAlbum(UUID id, UpdateAlbumDTO dto) {
         Album album = albumRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Album non trovato con ID: " + id));
 
-        if (newTitle != null && !newTitle.isBlank()) {
-            album.setTitle(newTitle);
+        if (dto.getTitle() != null && !dto.getTitle().isBlank()) {
+            album.setTitle(dto.getTitle());
         }
-        if (newArtist != null && !newArtist.isBlank()) {
-            album.setArtist(newArtist);
+        if (dto.getArtist() != null && !dto.getArtist().isBlank()) {
+            album.setArtist(dto.getArtist());
         }
-        if (newRating != null) {
-            album.setRating(newRating);
+        if (dto.getDate() != null) {
+            album.setDate(dto.getDate());
         }
 
-        Album updatedAlbum = albumRepository.save(album);
-        LOGGER.info("✅ Album aggiornato con successo: " + updatedAlbum.getId());
-        return updatedAlbum;
+        // 🔜 In futuro:
+        // if (dto.getSongsToRemove() != null) { ... }
+        // if (dto.getNewSongs() != null) { ... }
+
+        albumRepository.save(album);
+        LOGGER.info("✅ Album aggiornato con successo: " + album.getId());
     }
 
 
@@ -495,6 +499,13 @@ public class AlbumService {
             );
         }).toList();
     }
+
+    public List<String> getAllArtists() {
+        return albumRepository.findDistinctArtists();
+    }
+
+
+
 
 
     //ricerca per titolo album e artista

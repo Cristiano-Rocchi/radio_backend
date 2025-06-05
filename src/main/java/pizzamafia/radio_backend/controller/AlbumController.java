@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import pizzamafia.radio_backend.entities.Album;
 import pizzamafia.radio_backend.payloads.AlbumRespDTO;
 import pizzamafia.radio_backend.payloads.NewAlbumDTO;
+import pizzamafia.radio_backend.payloads.UpdateAlbumDTO;
 import pizzamafia.radio_backend.services.AlbumService;
 
 import java.util.List;
@@ -85,13 +86,27 @@ public class AlbumController {
 
     // 5️⃣ UPDATE ALBUM
     @PutMapping("/{id}")
-    public ResponseEntity<Album> updateAlbum(
+    public ResponseEntity<Void> updateAlbum(
             @PathVariable UUID id,
-            @RequestParam(required = false) String title,
-            @RequestParam(required = false) String artist,
-            @RequestParam(required = false) Integer rating) {
+            @ModelAttribute UpdateAlbumDTO dto) {
 
-        Album updatedAlbum = albumService.updateAlbum(id, title, artist, rating);
-        return ResponseEntity.ok(updatedAlbum);
+        albumService.updateAlbum(id, dto);
+        return ResponseEntity.ok().build();
     }
+
+    // ✅ Restituisce tutti gli artisti (nomi unici)
+    @GetMapping("/artists")
+    public ResponseEntity<List<String>> getAllArtists() {
+        List<String> artists = albumService.getAllArtists();
+        return ResponseEntity.ok(artists);
+    }
+
+    // ✅ Restituisce tutti gli album di un artista (con canzoni già incluse)
+    @GetMapping("/by-artist/{artist}")
+    public ResponseEntity<List<AlbumRespDTO>> getAlbumsByArtist(@PathVariable String artist) {
+        List<AlbumRespDTO> albums = albumService.searchAlbumsByArtist(artist);
+        return ResponseEntity.ok(albums);
+    }
+
+
 }
