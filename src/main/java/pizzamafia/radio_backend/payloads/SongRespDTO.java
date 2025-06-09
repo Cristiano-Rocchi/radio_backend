@@ -21,6 +21,7 @@ public class SongRespDTO {
     private UUID albumId;
     private String albumTitle;
     private String albumArtist;
+    private int playlistCount;
 
 
 }

@@ -17,6 +17,7 @@ import pizzamafia.radio_backend.payloads.SongRespDTO;
 import pizzamafia.radio_backend.payloads.UpdateAlbumDTO;
 import pizzamafia.radio_backend.repositories.AlbumRepository;
 import pizzamafia.radio_backend.repositories.GenreRepository;
+import pizzamafia.radio_backend.repositories.PlaylistSongRepository;
 import pizzamafia.radio_backend.repositories.SongRepository;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
@@ -58,6 +59,9 @@ public class AlbumService {
 
     @Autowired
     private BackblazeB2Config backblazeB2Config;
+
+    @Autowired
+    private PlaylistSongRepository playlistSongRepository;
 
     // 1️⃣ CREATE: crea album + carica canzoni su Backblaze
     public Album createAlbumFromUpload(NewAlbumDTO newAlbumDTO) {
@@ -306,7 +310,8 @@ public class AlbumService {
                         song.getLevel(),
                         song.getAlbum().getId(),
                         song.getAlbum().getTitle(),
-                        song.getAlbum().getTitle()
+                        song.getAlbum().getTitle(),
+                        playlistSongRepository.countBySongId(song.getId())
                 );
             }).collect(Collectors.toList());
 
@@ -341,7 +346,8 @@ public class AlbumService {
                     song.getLevel(),
                     song.getAlbum().getId(),
                     song.getAlbum().getTitle(),
-                    song.getAlbum().getArtist()
+                    song.getAlbum().getArtist(),
+                    playlistSongRepository.countBySongId(song.getId())
             );
         }).collect(Collectors.toList());
 
@@ -451,7 +457,8 @@ public class AlbumService {
                         song.getLevel(),
                         song.getAlbum().getId(),
                         song.getAlbum().getTitle(),
-                        song.getAlbum().getArtist()
+                        song.getAlbum().getArtist(),
+                        playlistSongRepository.countBySongId(song.getId())
                 );
             }).toList();
 
@@ -484,7 +491,8 @@ public class AlbumService {
                         song.getLevel(),
                         song.getAlbum().getId(),
                         song.getAlbum().getTitle(),
-                        song.getAlbum().getArtist()
+                        song.getAlbum().getArtist(),
+                        playlistSongRepository.countBySongId(song.getId())
                 );
             }).toList();
 
@@ -525,7 +533,8 @@ public class AlbumService {
                         song.getLevel(),
                         song.getAlbum().getId(),
                         song.getAlbum().getTitle(),
-                        song.getAlbum().getArtist()
+                        song.getAlbum().getArtist(),
+                        playlistSongRepository.countBySongId(song.getId())
                 );
             }).toList();
 
