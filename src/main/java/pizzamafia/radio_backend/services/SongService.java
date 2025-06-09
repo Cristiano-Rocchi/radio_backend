@@ -14,6 +14,7 @@ import pizzamafia.radio_backend.exceptions.NotFoundException;
 import pizzamafia.radio_backend.payloads.NewSongDTO;
 import pizzamafia.radio_backend.payloads.SongRespDTO;
 import pizzamafia.radio_backend.repositories.AlbumRepository;
+import pizzamafia.radio_backend.repositories.PlaylistSongRepository;
 import pizzamafia.radio_backend.repositories.SongRepository;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
@@ -51,6 +52,10 @@ public class SongService {
 
     @Autowired
     private BackblazeB2Config backblazeB2Config;
+
+    @Autowired
+    private PlaylistSongRepository playlistSongRepository;
+
 
     // 1️⃣ ADD SONGS (aggiunge nuove tracce a un album esistente)
     public List<SongRespDTO> addSongs(NewSongDTO newSongDTO) {
@@ -170,7 +175,8 @@ public class SongService {
                         saved.getLevel(),
                         saved.getAlbum().getId(),
                         saved.getAlbum().getTitle(),
-                        saved.getAlbum().getArtist()
+                        saved.getAlbum().getArtist(),
+                        0
                 ));
 
 
@@ -273,8 +279,8 @@ public class SongService {
                         song.getLevel(),
                         song.getAlbum().getId(),
                         song.getAlbum().getTitle(),
-                        song.getAlbum().getArtist()
-
+                        song.getAlbum().getArtist(),
+                        playlistSongRepository.countBySongId(song.getId())
                 ))
                 .collect(Collectors.toList());
     }
@@ -296,7 +302,8 @@ public class SongService {
                 song.getLevel(),
                 song.getAlbum().getId(),
                 song.getAlbum().getTitle(),
-                song.getAlbum().getArtist()
+                song.getAlbum().getArtist(),
+                playlistSongRepository.countBySongId(song.getId())
         );
     }
 
@@ -376,9 +383,11 @@ public class SongService {
                         song.getLevel(),
                         song.getAlbum().getId(),
                         song.getAlbum().getTitle(),
-                        song.getAlbum().getArtist()
+                        song.getAlbum().getArtist(),
+                        playlistSongRepository.countBySongId(song.getId()) // ✅ aggiunto
                 ))
                 .toList();
     }
+
 
 }

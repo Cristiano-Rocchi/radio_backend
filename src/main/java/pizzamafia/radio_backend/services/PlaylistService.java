@@ -132,7 +132,8 @@ public class PlaylistService {
                             song.getLevel(),
                             song.getAlbum().getId(),
                             song.getAlbum().getTitle(),
-                            song.getAlbum().getArtist()
+                            song.getAlbum().getArtist(),
+                            playlistSongRepository.countBySongId(song.getId())
                     );
                 })
                 .toList();
