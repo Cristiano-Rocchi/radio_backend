@@ -10,7 +10,7 @@ import java.util.UUID;
 public class UpdateAlbumDTO {
     private String title;
     private String artist;
-    private Integer date;
+    private String date;
     private List<UUID> songsToRemove;
     private List<MultipartFile> newSongs;
 }

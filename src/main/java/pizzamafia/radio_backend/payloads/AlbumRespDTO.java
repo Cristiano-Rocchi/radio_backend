@@ -15,7 +15,7 @@ public class AlbumRespDTO {
     private String title;
     private String artist;
     private Integer rating;
-    private Integer date;
+    private String date;
     private Long genreId;
     private List<SongRespDTO> songs;
 }

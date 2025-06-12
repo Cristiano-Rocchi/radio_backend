@@ -27,7 +27,7 @@ public class Album {
     private String artist;
 
     @Column
-    private Integer date;
+    private String date;
 
     @Column
     private int rating;

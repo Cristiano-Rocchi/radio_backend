@@ -27,7 +27,7 @@ public class AlbumController {
             @RequestParam String title,
             @RequestParam String artist,
             @RequestParam Long genreId,
-            @RequestParam(value = "date", required = false) Integer date,
+            @RequestParam(value = "date", required = false) String date,
             @RequestParam("songs") List<MultipartFile> songs) {
 
         // Assembla il DTO a mano

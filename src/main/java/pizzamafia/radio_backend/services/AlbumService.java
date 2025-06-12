@@ -69,7 +69,7 @@ public class AlbumService {
         String albumName = newAlbumDTO.getTitle();
         String artist = newAlbumDTO.getArtist();
         Long genreId = newAlbumDTO.getGenreId();
-        Integer albumDate = newAlbumDTO.getDate();
+        String albumDate = newAlbumDTO.getDate();
         List<MultipartFile> songs = newAlbumDTO.getSongs();
 
         if (albumName == null || albumName.isBlank()) {
